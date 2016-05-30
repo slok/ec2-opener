@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/fatih/color"
 )
 
 var (
@@ -39,7 +40,7 @@ func exit(code int) {
 }
 
 func cleanup() {
-	fmt.Println("Cleaning...")
+	color.Yellow("Cleaning...")
 	// Unset security group
 	if instance != nil {
 		sgs := []string{}
@@ -57,7 +58,7 @@ func cleanup() {
 			os.Exit(1)
 		}
 	}
-	fmt.Println("Clean complete, good bye")
+	color.Green("Clean complete, good bye")
 }
 
 //createSecurityGroup creates security group
@@ -77,7 +78,7 @@ func createSecurityGroup(vpcID string) (groupID string, err error) {
 		return "", err
 	}
 
-	fmt.Printf("%s security group created\n", *resp.GroupId)
+	color.White("%s security group created\n", *resp.GroupId)
 	return *resp.GroupId, nil
 }
 
@@ -105,7 +106,7 @@ func setSecurityGoupRules(sgID string, rules []*ingressRule) error {
 
 	_, err := svc.AuthorizeSecurityGroupIngress(params)
 
-	fmt.Printf("Set ingress rules for %s\n", sgID)
+	color.White("Set ingress rules for %s\n", sgID)
 	return err
 }
 
@@ -115,7 +116,7 @@ func deleteSecurityGroup(sgID string) error {
 		GroupId: aws.String(sgID),
 	}
 	_, err := svc.DeleteSecurityGroup(params)
-	fmt.Printf("%s Security group deleted\n", sgID)
+	color.White("%s Security group deleted\n", sgID)
 	return err
 }
 
@@ -151,7 +152,7 @@ func setSecurityGroupsOnInstance(instanceID string, securityGroups []string) err
 		Groups:     gs,
 	}
 	_, err := svc.ModifyInstanceAttribute(params)
-	fmt.Printf("Security group set on instance\n")
+	color.White("Security group set on instance\n")
 	return err
 }
 
@@ -176,6 +177,10 @@ func main() {
 	if region != "" {
 		awsConf = &aws.Config{Region: aws.String(region)}
 	}
+
+	color.Green("Taget instance: ")
+	color.Green("  -Instance ID: %s", instanceID)
+	color.Green("  -Region: %s", region)
 
 	// Open a new Ec2 session
 	svc = ec2.New(session.New(), awsConf)
@@ -233,8 +238,9 @@ func main() {
 	signal.Notify(c, syscall.SIGTERM)
 	signal.Notify(c, os.Interrupt)
 
-	fmt.Println("Press ctr+C to close the instance port...")
+	color.Yellow("Press ctr+C to close the instance port...")
 	<-c
 	cleanup()
+	os.Exit(0)
 
 }

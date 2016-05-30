@@ -1,6 +1,34 @@
-hash: ec9c9cebe51ca51bef237cc72af67b01bda165ff249990570ea628812f7bde7b
-updated: 2016-05-30T07:50:06.105837132Z
+hash: 8f80bb0a84ab4ef4097b03cdc7fe7521975fca5084aac0748439e42c95225b38
+updated: 2016-05-30T14:32:00.043764826Z
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 665c623d7f3e0ee276596b006655ba4dbe0565b0
+  subpackages:
+  - aws
+  - aws/session
+  - service/ec2
+  - aws/awserr
+  - aws/credentials
+  - aws/client
+  - aws/corehandlers
+  - aws/defaults
+  - aws/request
+  - private/endpoints
+  - aws/awsutil
+  - aws/client/metadata
+  - private/protocol
+  - private/protocol/ec2query
+  - private/signer/v4
+  - private/waiter
+  - aws/credentials/ec2rolecreds
+  - aws/ec2metadata
+  - private/protocol/query/queryutil
+  - private/protocol/xml/xmlutil
+  - private/protocol/rest
+- name: github.com/fatih/color
+  version: 533cd7fd8a85905f67a1753afb4deddc85ea174f
+- name: github.com/go-ini/ini
+  version: 12f418cc7edc5a618a51407b7ac1f1f512139df3
+- name: github.com/jmespath/go-jmespath
+  version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
 devImports: []

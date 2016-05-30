@@ -1,3 +1,4 @@
 package: github.com/slok/ec2-opener
 import:
 - package: github.com/aws/aws-sdk-go
+- package: github.com/fatih/color
