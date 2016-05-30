@@ -1,0 +1,10 @@
+version: "2"
+services:
+  ec2-open-port:
+    build:
+      context: ../..
+      dockerfile: environment/dev/Dockerfile
+    volumes:
+      - ../..:/go/src/github.com/slok/ec2-open-port/
+      - ~/.bash_history.ec2-open-port:/home/app/.bash_history
+    command: "go run main.go"
