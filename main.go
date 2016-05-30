@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"math/rand"
 	"os"
@@ -40,16 +41,21 @@ func exit(code int) {
 func cleanup() {
 	fmt.Println("Cleaning...")
 	// Unset security group
-	sgs := []string{}
-	for _, sg := range instance.SecurityGroups {
-		sgs = append(sgs, *sg.GroupId)
+	if instance != nil {
+		sgs := []string{}
+		for _, sg := range instance.SecurityGroups {
+			sgs = append(sgs, *sg.GroupId)
+		}
+		setSecurityGroupsOnInstance(*instance.InstanceId, sgs)
 	}
-	setSecurityGroupsOnInstance(*instance.InstanceId, sgs)
-	err := deleteSecurityGroup(sgID)
 
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not delete '%s' security group: %v\n", sgID, err)
-		os.Exit(1)
+	if sgID != "" {
+		err := deleteSecurityGroup(sgID)
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Could not delete '%s' security group: %v\n", sgID, err)
+			os.Exit(1)
+		}
 	}
 	fmt.Println("Clean complete, good bye")
 }
@@ -150,7 +156,20 @@ func setSecurityGroupsOnInstance(instanceID string, securityGroups []string) err
 }
 
 func main() {
-	region := "eu-west-1"
+
+	regionF := flag.String("region", "", "AWS region where the instance is, overwrites AWS_REGION")
+	instanceIDF := flag.String("instance", "", "AWS instance ID")
+
+	flag.Parse()
+
+	region := *regionF
+	instanceID := *instanceIDF
+
+	if instanceID == "" {
+		fmt.Fprint(os.Stderr, "Need an instance id as argument\n")
+		exit(1)
+	}
+
 	var awsConf *aws.Config
 
 	// If region then overwrite
@@ -160,8 +179,6 @@ func main() {
 
 	// Open a new Ec2 session
 	svc = ec2.New(session.New(), awsConf)
-
-	instanceID := "i-016e456f844f9ac25"
 
 	// Get instance
 	var err error
