@@ -1,8 +1,8 @@
-.PHONY: default deps  base build dev shell start stop image push
+.PHONY: default deps base build vendor dev shell start stop image push
 SHELL := $(shell which bash)
 DOCKER := $(shell command -v docker)
 DOCKER_COMPOSE := $(shell command -v docker-compose)
-SERVICE_NAME := ec2-open-port
+SERVICE_NAME := ec2-opener
 IMAGE_NAME := slok/$(SERVICE_NAME)
 GID := $(shell id -g)
 UID := $(shell id -u)
@@ -24,11 +24,17 @@ base: deps
 build: base
 	cd environment/dev && docker-compose build
 
+vendor:
+	cd environment/dev && \
+	( docker-compose run --rm $(SERVICE_NAME) bash -c "glide install"; \
+	docker-compose stop; \
+	docker-compose rm -f -a; )
+
 dev: build
 	cd environment/dev && \
 	( docker-compose run --rm $(SERVICE_NAME) bash -c "go run *.go"; \
 		docker-compose stop; \
-		docker-compose rm -f; )
+		docker-compose rm -f -a; )
 
 shell: build
 	cd environment/dev && docker-compose run --rm $(SERVICE_NAME) /bin/bash
@@ -41,7 +47,7 @@ start: build
 stop:
 	cd environment/dev && ( \
 		docker-compose stop; \
-		docker-compose rm -f; \
+		docker-compose rm -f -a; \
 		)
 
 #image: base

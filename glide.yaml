@@ -1,3 +1,3 @@
-package: github.com/slok/ec2-open-port
+package: github.com/slok/ec2-opener
 import:
 - package: github.com/aws/aws-sdk-go
