@@ -10,7 +10,6 @@ RUN go get github.com/Masterminds/glide
 
 RUN mkdir -p /go/src/github.com/slok/ec2-opener/
 
-COPY . /go/src/github.com/slok/ec2-opener/
 WORKDIR /go/src/github.com/slok/ec2-opener/
 
 RUN chown -R app:app /go

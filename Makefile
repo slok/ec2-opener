@@ -1,4 +1,4 @@
-.PHONY: default deps base build vendor dev shell start stop image push
+.PHONY: default deps base build vendor dev shell start stop image
 SHELL := $(shell which bash)
 DOCKER := $(shell command -v docker)
 DOCKER_COMPOSE := $(shell command -v docker-compose)
@@ -50,8 +50,5 @@ stop:
 		docker-compose rm -f -a; \
 		)
 
-#image: base
-#	docker build -t $(SERVICE_NAME) -t $(REPOSITORY):$(VERSION) -t $(REPOSITORY):latest -f environment/prod/Dockerfile .
-#
-#push: image
-#	docker push $(IMAGE_NAME)
+image: base
+	docker build -t $(IMAGE_NAME) -t $(IMAGE_NAME):$(VERSION) -t $(IMAGE_NAME):latest -f environment/prod/Dockerfile .
