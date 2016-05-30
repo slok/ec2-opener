@@ -8,3 +8,9 @@ services:
       - ../..:/go/src/github.com/slok/ec2-open-port/
       - ~/.bash_history.ec2-open-port:/home/app/.bash_history
     command: "go run main.go"
+    environment:
+      - AWS_REGION
+      - AWS_DEFAULT_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
