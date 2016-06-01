@@ -50,5 +50,11 @@ stop:
 		docker-compose rm -f -a; \
 		)
 
+test: build vendor
+	cd environment/dev && \
+	( docker-compose run --rm $(SERVICE_NAME) bash -c 'go test `glide nv` -v'; \
+		docker-compose stop; \
+		docker-compose rm -f -a; )
+
 image: base
 	docker build -t $(IMAGE_NAME) -t $(IMAGE_NAME):$(VERSION) -t $(IMAGE_NAME):latest -f environment/prod/Dockerfile .
