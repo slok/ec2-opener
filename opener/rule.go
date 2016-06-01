@@ -48,3 +48,37 @@ const (
 	// ICMP Protocol
 	ICMP
 )
+
+const (
+	// AllCIDR is the CIDR that describes all addresses
+	AllCIDR = "0.0.0.0/0"
+)
+
+// Rule defines the rule where the instances need to be accessed
+type Rule struct {
+	CIDR     string
+	Port     int
+	Protocol RuleProtocol
+}
+
+// NewRule creates a regular Rule
+func NewRule(cidr string, port int, protocol RuleProtocol) *Rule {
+	r := &Rule{
+		CIDR:     cidr,
+		Port:     port,
+		Protocol: protocol,
+	}
+
+	return r
+}
+
+// NewOpenRule creates a rule to a port accessible with all supported protocols and from anywhere
+func NewOpenRule(port int) *Rule {
+	r := &Rule{
+		CIDR:     AllCIDR,
+		Port:     port,
+		Protocol: ALL,
+	}
+
+	return r
+}
