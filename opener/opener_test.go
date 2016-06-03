@@ -3,16 +3,17 @@ package opener
 import (
 	"testing"
 
-	"github.com/slok/ec2-opener/engine"
+	"github.com/slok/ec2-opener/opener/engine"
+	"github.com/slok/ec2-opener/rule"
 )
 
 func TestNewOpener(t *testing.T) {
 	tests := []struct {
-		rules  []*Rule
+		rules  []*rule.Rule
 		engine engine.Engine
 	}{
 		{
-			rules:  []*Rule{&Rule{}},
+			rules:  []*rule.Rule{&rule.Rule{}},
 			engine: &engine.Dummy{},
 		},
 	}
@@ -32,7 +33,19 @@ func TestNewOpener(t *testing.T) {
 
 func TestOpenerOpen(t *testing.T) {
 	e, _ := engine.NewDummy()
-	o, err := NewOpener(nil, e)
+	rs := []*rule.Rule{
+		&rule.Rule{
+			CIDR:     "0.0.0.0/0",
+			Protocol: rule.TCP,
+			Port:     22,
+		},
+		&rule.Rule{
+			CIDR:     "54.12.45.0/24",
+			Protocol: rule.UDP,
+			Port:     9873,
+		},
+	}
+	o, err := NewOpener(rs, e)
 
 	if err != nil {
 		t.Errorf("Got error while creating opener: %s", err)
@@ -48,4 +61,16 @@ func TestOpenerOpen(t *testing.T) {
 	if o.Status != Open {
 		t.Errorf("Got wrong status: %s; want: %s", o.Status, Open)
 	}
+
+	// Check openned rules
+	for _, r := range rs {
+		if got, ok := e.OpenRules[r.String()]; !ok {
+			t.Errorf("Rule %s, not opened", r)
+		} else {
+			if got.String() != r.String() {
+				t.Errorf("Not expected rule: got: %s; want: %s", got, r)
+			}
+		}
+	}
+
 }

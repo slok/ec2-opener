@@ -1,4 +1,4 @@
-package opener
+package rule
 
 import "testing"
 
@@ -6,7 +6,7 @@ func TestValidProtocol(t *testing.T) {
 	tests := []struct {
 		proto string
 		valid bool
-		want  RuleProtocol
+		want  Protocol
 	}{
 		{proto: "udp", valid: true, want: UDP},
 		{proto: "UDP", valid: true, want: UDP},
@@ -23,7 +23,7 @@ func TestValidProtocol(t *testing.T) {
 
 	for _, test := range tests {
 
-		parsedProto, err := ParseRuleProtocol(test.proto)
+		parsedProto, err := ParseProtocol(test.proto)
 
 		// Check for errors
 		if err != nil && test.valid {

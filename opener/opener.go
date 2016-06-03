@@ -1,3 +1,4 @@
+// Package opener package contains all the logic to open access to an EC2 instance or instances
 package opener
 
 import (
@@ -5,7 +6,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/slok/ec2-opener/engine"
+	"github.com/slok/ec2-opener/opener/engine"
+	"github.com/slok/ec2-opener/rule"
 )
 
 // Status type indicates the status of the opener
@@ -37,7 +39,7 @@ func (s Status) String() string {
 // Opener will desribe the way that will open the Instance(s)
 type Opener struct {
 	ID     string
-	Rules  []*Rule
+	Rules  []*rule.Rule
 	Engine engine.Engine
 	Status Status
 }
@@ -49,7 +51,7 @@ func randomID() string {
 }
 
 // NewOpener Creates a new Opener
-func NewOpener(rules []*Rule, engine engine.Engine) (*Opener, error) {
+func NewOpener(rules []*rule.Rule, engine engine.Engine) (*Opener, error) {
 	id := randomID()
 	o := &Opener{
 		ID:     id,

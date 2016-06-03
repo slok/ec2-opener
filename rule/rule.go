@@ -1,13 +1,16 @@
-// Package opener package contains all the logic to open access to an EC2 instance or instances
-package opener
+// Package rule  represents all the logic for the listener rules
+package rule
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
-// RuleProtocol represents the valid protocols for an EC2 port listener
-type RuleProtocol int
+// Protocol represents the valid protocols for an EC2 port listener
+type Protocol int
 
 // String implements stringer interface for RuleProtocol
-func (r RuleProtocol) String() string {
+func (r Protocol) String() string {
 	switch r {
 	case ALL:
 		return "all"
@@ -22,8 +25,8 @@ func (r RuleProtocol) String() string {
 	}
 }
 
-// ParseRuleProtocol parses a valid protocol
-func ParseRuleProtocol(proto string) (RuleProtocol, error) {
+// ParseProtocol parses a valid protocol
+func ParseProtocol(proto string) (Protocol, error) {
 	switch proto {
 	case "all", "ALL":
 		return ALL, nil
@@ -40,7 +43,7 @@ func ParseRuleProtocol(proto string) (RuleProtocol, error) {
 
 const (
 	// ALL protocols
-	ALL RuleProtocol = iota
+	ALL Protocol = iota
 	// TCP protocol
 	TCP
 	// UDP Protocol
@@ -58,11 +61,11 @@ const (
 type Rule struct {
 	CIDR     string
 	Port     int
-	Protocol RuleProtocol
+	Protocol Protocol
 }
 
-// NewRule creates a regular Rule
-func NewRule(cidr string, port int, protocol RuleProtocol) *Rule {
+// New creates a regular Rule
+func New(cidr string, port int, protocol Protocol) *Rule {
 	r := &Rule{
 		CIDR:     cidr,
 		Port:     port,
@@ -81,4 +84,9 @@ func NewOpenRule(port int) *Rule {
 	}
 
 	return r
+}
+
+// Implement stringer interface
+func (r *Rule) String() string {
+	return fmt.Sprintf("%s:%d:%s", r.CIDR, r.Port, r.Protocol)
 }
