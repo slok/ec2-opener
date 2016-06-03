@@ -29,3 +29,23 @@ func TestNewOpener(t *testing.T) {
 		}
 	}
 }
+
+func TestOpenerOpen(t *testing.T) {
+	e, _ := engine.NewDummy()
+	o, err := NewOpener(nil, e)
+
+	if err != nil {
+		t.Errorf("Got error while creating opener: %s", err)
+	}
+
+	if o.Status != Close {
+		t.Errorf("Got wrong status: %s; want: %s", o.Status, Close)
+	}
+
+	// Open
+	o.Open()
+
+	if o.Status != Open {
+		t.Errorf("Got wrong status: %s; want: %s", o.Status, Open)
+	}
+}
