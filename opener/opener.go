@@ -13,7 +13,7 @@ type Status int
 
 const (
 	// Open status
-	Open = iota
+	Open Status = iota
 	// Close status
 	Close
 	// Error status
