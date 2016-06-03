@@ -10,7 +10,7 @@ type RuleProtocol int
 func (r RuleProtocol) String() string {
 	switch r {
 	case ALL:
-		return "-1"
+		return "all"
 	case TCP:
 		return "tcp"
 	case UDP:
