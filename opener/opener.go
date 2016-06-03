@@ -65,6 +65,13 @@ func NewOpener(rules []*rule.Rule, engine engine.Engine) (*Opener, error) {
 
 // Open is the action of oppenning the listeners on the atarget
 func (o *Opener) Open() error {
+	// Open with the engine
+	if err := o.Engine.Open(o.Rules); err != nil {
+		return fmt.Errorf("error opening rules: %s", err)
+	}
+
+	// All ok, set status to open
 	o.Status = Open
+
 	return nil
 }
