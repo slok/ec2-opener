@@ -12,7 +12,7 @@ import (
 type Opener struct {
 	ID     string
 	Rules  []*Rule
-	Engine *engine.Engine
+	Engine engine.Engine
 }
 
 func randomID() string {
@@ -22,7 +22,7 @@ func randomID() string {
 }
 
 // NewOpener Creates a new Opener
-func NewOpener(rules []*Rule, engine *engine.Engine) (*Opener, error) {
+func NewOpener(rules []*Rule, engine engine.Engine) (*Opener, error) {
 	id := randomID()
 	o := &Opener{
 		ID:     id,

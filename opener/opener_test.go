@@ -9,11 +9,11 @@ import (
 func TestNewOpener(t *testing.T) {
 	tests := []struct {
 		rules  []*Rule
-		engine *engine.Engine
+		engine engine.Engine
 	}{
 		{
 			rules:  []*Rule{&Rule{}},
-			engine: &engine.Engine{},
+			engine: &engine.Dummy{},
 		},
 	}
 
