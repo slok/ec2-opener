@@ -1,5 +1,5 @@
-hash: 8f80bb0a84ab4ef4097b03cdc7fe7521975fca5084aac0748439e42c95225b38
-updated: 2016-05-30T14:32:00.043764826Z
+hash: 86a62c138ba57dc71fd8be948020f7c0722706a155ce351729c3ec37a023dcac
+updated: 2016-06-04T07:12:21.346760316Z
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 665c623d7f3e0ee276596b006655ba4dbe0565b0
@@ -31,4 +31,16 @@ imports:
   version: 12f418cc7edc5a618a51407b7ac1f1f512139df3
 - name: github.com/jmespath/go-jmespath
   version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
+- name: github.com/mattn/go-colorable
+  version: 9cbef7c35391cca05f15f8181dc0b18bc9736dbb
+  repo: https://github.com/mattn/go-colorable
+- name: github.com/mattn/go-isatty
+  version: 56b76bdf51f7708750eac80fa38b952bb9f32639
+  repo: https://github.com/mattn/go-isatty
+- name: github.com/Sirupsen/logrus
+  version: f3cfb454f4c209e6668c95216c4744b8fddb2356
+- name: golang.org/x/sys
+  version: 076b546753157f758b316e59bcb51e6807c04057
+  subpackages:
+  - unix
 devImports: []

@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/Sirupsen/logrus"
+
 	"github.com/slok/ec2-opener/opener/engine"
 	"github.com/slok/ec2-opener/rule"
 )
@@ -69,8 +71,11 @@ func NewOpener(rules []*rule.Rule, engine engine.Engine) (*Opener, error) {
 
 // Open is the action of oppenning the listeners on the atarget
 func (o *Opener) Open() error {
+	logrus.Debugf("Start opening %s", o.ID)
+
 	// already open
 	if o.Status == Open {
+		logrus.Warnf("%s opener already open", o.ID)
 		return nil
 	}
 
@@ -87,13 +92,17 @@ func (o *Opener) Open() error {
 	// All ok, set status to open
 	o.Status = Open
 
+	logrus.Debugf("Finish opening %s", o.ID)
 	return nil
 }
 
 // Close is the action of closing open listeners on the target
 func (o *Opener) Close() error {
+	logrus.Debugf("Start closing %s", o.ID)
+
 	// already closed
 	if o.Status == Close {
+		logrus.Warnf("%s opener already closed", o.ID)
 		return nil
 	}
 
@@ -109,13 +118,18 @@ func (o *Opener) Close() error {
 
 	// All ok, set status
 	o.Status = Close
+
+	logrus.Debugf("Finish closing %s.", o.ID)
 	return nil
 }
 
 // Clean is the action of cleaning up all the stuff made when opening and closing on target
 func (o *Opener) Clean() error {
+	logrus.Debugf("Start cleaning %s", o.ID)
+
 	// already closed
 	if o.Status == Clean {
+		logrus.Warnf("%s opener already clean", o.ID)
 		return nil
 	}
 
@@ -130,6 +144,8 @@ func (o *Opener) Clean() error {
 	}
 
 	o.Status = Clean
+
+	logrus.Debugf("Finish cleaning %s.", o.ID)
 	return nil
 
 }
