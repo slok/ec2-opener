@@ -9,4 +9,7 @@ type Engine interface {
 
 	// Close rules on the target
 	Close() error
+
+	// Clean rules on the target
+	Clean() error
 }

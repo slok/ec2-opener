@@ -34,3 +34,10 @@ func (d *Dummy) Close() error {
 	d.OpenRules = map[string]*rule.Rule{}
 	return nil
 }
+
+// Clean removes the open and closed rules
+func (d *Dummy) Clean() error {
+	d.OpenRules = map[string]*rule.Rule{}
+	d.CloseRules = map[string]*rule.Rule{}
+	return nil
+}

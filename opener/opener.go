@@ -74,6 +74,11 @@ func (o *Opener) Open() error {
 		return nil
 	}
 
+	// check if previous status is ok
+	if o.Status != Clean {
+		return fmt.Errorf("you need to be on clean state before opening, current status: %s", o.Status)
+	}
+
 	// Open with the engine
 	if err := o.Engine.Open(o.Rules); err != nil {
 		return fmt.Errorf("error opening rules: %s", err)
@@ -92,6 +97,11 @@ func (o *Opener) Close() error {
 		return nil
 	}
 
+	// check if previous status is ok
+	if o.Status != Open {
+		return fmt.Errorf("you need to be on open state before closing, current status: %s", o.Status)
+	}
+
 	// Close with the engine
 	if err := o.Engine.Close(); err != nil {
 		return fmt.Errorf("error closing rules: %s", err)
@@ -100,4 +110,26 @@ func (o *Opener) Close() error {
 	// All ok, set status
 	o.Status = Close
 	return nil
+}
+
+// Clean is the action of cleaning up all the stuff made when opening and closing on target
+func (o *Opener) Clean() error {
+	// already closed
+	if o.Status == Clean {
+		return nil
+	}
+
+	// check if previous status is ok
+	if o.Status != Close {
+		return fmt.Errorf("you need to be on closed state before cleaning up, current status: %s", o.Status)
+	}
+
+	// Clean with the engine
+	if err := o.Engine.Clean(); err != nil {
+		return fmt.Errorf("error cleaning rules: %s", err)
+	}
+
+	o.Status = Clean
+	return nil
+
 }

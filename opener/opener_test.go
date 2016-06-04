@@ -113,3 +113,42 @@ func TestOpenerClose(t *testing.T) {
 	}
 
 }
+
+func TestOpenerClean(t *testing.T) {
+	e, _ := engine.NewDummy()
+	rs := []*rule.Rule{
+		&rule.Rule{
+			CIDR:     "0.0.0.0/0",
+			Protocol: rule.TCP,
+			Port:     22,
+		},
+		&rule.Rule{
+			CIDR:     "54.12.45.0/24",
+			Protocol: rule.UDP,
+			Port:     9873,
+		},
+	}
+	o, _ := NewOpener(rs, e)
+	o.Open()
+
+	if o.Status != Open {
+		t.Errorf("Got wrong status: %s; want: %s", o.Status, Open)
+	}
+
+	o.Close()
+
+	if o.Status != Close {
+		t.Errorf("Got wrong status: %s; want: %s", o.Status, Close)
+	}
+
+	o.Clean()
+
+	if o.Status != Clean {
+		t.Errorf("Got wrong status: %s; want: %s", o.Status, Clean)
+	}
+
+	if len(e.OpenRules) != 0 || len(e.CloseRules) != 0 {
+		t.Errorf("Open and close rules should be clean")
+	}
+
+}
