@@ -6,4 +6,7 @@ import "github.com/slok/ec2-opener/rule"
 type Engine interface {
 	// Open rules on the target
 	Open(rules []*rule.Rule) error
+
+	// Close rules on the target
+	Close() error
 }

@@ -18,6 +18,8 @@ const (
 	Open Status = iota
 	// Close status
 	Close
+	// Clean status
+	Clean
 	// Error status
 	Error
 )
@@ -30,6 +32,8 @@ func (s Status) String() string {
 		return "close"
 	case Error:
 		return "error"
+	case Clean:
+		return "clean"
 	default:
 		return "unknown"
 
@@ -57,7 +61,7 @@ func NewOpener(rules []*rule.Rule, engine engine.Engine) (*Opener, error) {
 		ID:     id,
 		Rules:  rules,
 		Engine: engine,
-		Status: Close,
+		Status: Clean,
 	}
 
 	return o, nil
@@ -65,6 +69,11 @@ func NewOpener(rules []*rule.Rule, engine engine.Engine) (*Opener, error) {
 
 // Open is the action of oppenning the listeners on the atarget
 func (o *Opener) Open() error {
+	// already open
+	if o.Status == Open {
+		return nil
+	}
+
 	// Open with the engine
 	if err := o.Engine.Open(o.Rules); err != nil {
 		return fmt.Errorf("error opening rules: %s", err)
@@ -73,5 +82,22 @@ func (o *Opener) Open() error {
 	// All ok, set status to open
 	o.Status = Open
 
+	return nil
+}
+
+// Close is the action of closing open listeners on the target
+func (o *Opener) Close() error {
+	// already closed
+	if o.Status == Close {
+		return nil
+	}
+
+	// Close with the engine
+	if err := o.Engine.Close(); err != nil {
+		return fmt.Errorf("error closing rules: %s", err)
+	}
+
+	// All ok, set status
+	o.Status = Close
 	return nil
 }
