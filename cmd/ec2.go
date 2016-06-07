@@ -48,7 +48,7 @@ func ec2Main(cmd *cobra.Command, args []string) {
 	}
 
 	// Create opener
-	e, err := engine.NewDummy()
+	e, err := engine.NewEc2ByIDs(instances)
 	if err != nil {
 		logrus.Error(err)
 		os.Exit(1)
