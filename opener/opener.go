@@ -145,7 +145,7 @@ func (o *Opener) Clean() error {
 
 	o.Status = Clean
 
-	logrus.Debugf("Finish cleaning %s.", o.ID)
+	logrus.Debugf("Finish cleaning %s", o.ID)
 	return nil
 
 }

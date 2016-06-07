@@ -15,9 +15,74 @@
 package cmd
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/slok/ec2-opener/opener"
+	"github.com/slok/ec2-opener/opener/engine"
+	"github.com/slok/ec2-opener/rule"
 )
+
+func exit(opener *opener.Opener, code int) {
+	logrus.Debugf("Cleaning up")
+	// cleanup all the mess
+	opener.Clean()
+
+	// Finish program
+	logrus.Debugf("Exiting")
+	time.Sleep(1 * time.Second)
+	os.Exit(code)
+}
+
+func ec2Main(cmd *cobra.Command, args []string) {
+	logrus.SetLevel(logrus.DebugLevel)
+	logrus.Debugf("Call EC2 opener")
+	if logrus.GetLevel() == logrus.DebugLevel {
+		cmd.DebugFlags()
+	}
+
+	// Create opener
+	e, err := engine.NewDummy()
+	if err != nil {
+		logrus.Error(err)
+		os.Exit(1)
+	}
+	rs := []*rule.Rule{}
+	o, err := opener.NewOpener(rs, e)
+	if err != nil {
+		logrus.Error(err)
+		os.Exit(1)
+	}
+
+	// Open rules
+	err = o.Open()
+	if err != nil {
+		logrus.Error(err)
+		exit(o, 1)
+	}
+
+	// Listen until ^C
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGTERM)
+	signal.Notify(c, os.Interrupt)
+
+	logrus.Debugf("Press ctr+C to close the instance port")
+	<-c
+	err = o.Close()
+
+	if err != nil {
+		logrus.Error(err)
+		exit(o, 1)
+	}
+
+	exit(o, 0)
+}
 
 // Command flags
 var (
@@ -30,8 +95,7 @@ var ec2Cmd = &cobra.Command{
 	Use:   "ec2",
 	Short: "EC2 engine for the target opening",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-	},
+	Run:   ec2Main,
 }
 
 func init() {
