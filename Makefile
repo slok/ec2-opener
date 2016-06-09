@@ -1,4 +1,4 @@
-.PHONY: default deps base build vendor dev shell start stop image
+.PHONY: default deps base build vendor dev shell start stop image mockgen
 SHELL := $(shell which bash)
 DOCKER := $(shell command -v docker)
 DOCKER_COMPOSE := $(shell command -v docker-compose)
@@ -7,6 +7,7 @@ IMAGE_NAME := slok/$(SERVICE_NAME)
 GID := $(shell id -g)
 UID := $(shell id -u)
 VERSION ?= $(shell cat VERSION)
+HISTORY_FILE := ~/.bash_history.$(SERVICE_NAME)
 
 default: build
 
@@ -37,6 +38,8 @@ dev: build
 		docker-compose rm -f -a; )
 
 shell: build
+	-rmdir $(HISTORY_FILE)
+	-touch $(HISTORY_FILE)
 	cd environment/dev && docker-compose run --rm $(SERVICE_NAME) /bin/bash
 
 
@@ -56,3 +59,6 @@ test: build vendor
 
 image: base
 	docker build -t $(IMAGE_NAME) -t $(IMAGE_NAME):$(VERSION) -t $(IMAGE_NAME):latest -f environment/prod/Dockerfile .
+
+mockgen: build
+	 cd environment/dev && docker-compose run --rm $(SERVICE_NAME) mockgen -source opener/engine/aws/client/ec2.go -destination opener/engine/aws/client/mock/sdk/ec2_mock.go

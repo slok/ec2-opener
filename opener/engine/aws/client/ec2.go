@@ -19,7 +19,7 @@ type Ec2APIClient struct {
 	session *ec2.EC2
 }
 
-// NewEc2APIClient Creates and returns a new ec2Client
+// NewEc2APIClient Creates and returns a new ec2APIClient
 func NewEc2APIClient() (*Ec2APIClient, error) {
 	// Simple engine object with an EC2 session
 	e := &Ec2APIClient{}
@@ -31,7 +31,7 @@ func NewEc2APIClient() (*Ec2APIClient, error) {
 	return e, nil
 }
 
-// DescribeInstancesByID private method to get the instances from AWS querying by IDs
+// DescribeInstancesByID gets the instances from AWS querying by IDs
 func (e *Ec2APIClient) DescribeInstancesByID(ids []string) []*ec2.Instance {
 	result := []*ec2.Instance{}
 

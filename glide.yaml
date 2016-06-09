@@ -7,3 +7,6 @@ import:
   subpackages:
   - cobra
 - package: github.com/spf13/viper
+- package: github.com/golang/mock
+  subpackages:
+  - gomock

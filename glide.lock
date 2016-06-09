@@ -1,16 +1,44 @@
-hash: be88aebfb13ecf601c786bf537694a999b39468b7bde9839d9d61990b7cb12e9
-updated: 2016-06-06T08:57:23.178257628Z
+hash: 37830887afd38cfb286fa19f6426e00f8fc3ff6b3e9ee45f2d2724acd7c2f9c1
+updated: 2016-06-09T07:41:49.249389433Z
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 665c623d7f3e0ee276596b006655ba4dbe0565b0
+  subpackages:
+  - service/ec2
+  - aws
+  - aws/session
+  - aws/awsutil
+  - aws/client
+  - aws/client/metadata
+  - aws/request
+  - private/endpoints
+  - private/protocol
+  - private/protocol/ec2query
+  - private/signer/v4
+  - private/waiter
+  - aws/awserr
+  - aws/credentials
+  - aws/corehandlers
+  - aws/defaults
+  - private/protocol/query/queryutil
+  - private/protocol/xml/xmlutil
+  - private/protocol/rest
+  - aws/credentials/ec2rolecreds
+  - aws/ec2metadata
 - name: github.com/BurntSushi/toml
   version: f0aeabca5a127c4078abb8c8d64298b147264b55
 - name: github.com/fatih/color
   version: 533cd7fd8a85905f67a1753afb4deddc85ea174f
 - name: github.com/fsnotify/fsnotify
   version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
+- name: github.com/go-ini/ini
+  version: 12f418cc7edc5a618a51407b7ac1f1f512139df3
+- name: github.com/golang/mock
+  version: bd3c8e81be01eef76d4b503f5e687d2d1354d2d9
+  subpackages:
+  - gomock
 - name: github.com/hashicorp/hcl
-  version: 9a905a34e6280ce905da1a32344b25e81011197a
+  version: d7400db7143f8e869812e50a53acd6c8d92af3b8
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -22,6 +50,8 @@ imports:
   - json/token
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/jmespath/go-jmespath
+  version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
 - name: github.com/magiconair/properties
   version: c265cfa48dda6474e208715ca93e987829f572f8
 - name: github.com/mitchellh/mapstructure
@@ -31,7 +61,7 @@ imports:
 - name: github.com/spf13/cast
   version: 27b586b42e29bec072fe7379259cc719e1289da6
 - name: github.com/spf13/cobra
-  version: f447048345b64b3247b29a679a14bd0da12c7f2f
+  version: 1238ba19d24b0b9ceee2094e1cb31947d45c3e86
   subpackages:
   - cobra
 - name: github.com/spf13/jwalterweatherman
@@ -40,10 +70,8 @@ imports:
   version: cb88ea77998c3f024757528e3305022ab50b43be
 - name: github.com/spf13/viper
   version: c1ccc378a054ea8d4e38d8c67f6938d4760b53dd
-- name: golang.org/x/sys
-  version: 076b546753157f758b316e59bcb51e6807c04057
-  subpackages:
-  - unix
+- name: golang.org/x/sys/unix
+  version: ""
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 devImports: []
