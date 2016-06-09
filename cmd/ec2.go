@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/slok/ec2-opener/opener"
-	"github.com/slok/ec2-opener/opener/engine"
+	"github.com/slok/ec2-opener/opener/engine/aws"
 	"github.com/slok/ec2-opener/rule"
 )
 
@@ -48,7 +48,7 @@ func ec2Main(cmd *cobra.Command, args []string) {
 	}
 
 	// Create opener
-	e, err := engine.NewEc2ByIDs(instances)
+	e, err := aws.NewEc2ByIDs(instances)
 	if err != nil {
 		logrus.Error(err)
 		os.Exit(1)
