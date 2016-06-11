@@ -91,7 +91,7 @@ func (e *Ec2Engine) InitByInstancesOrTags(instanceIds, tags []string) error {
 
 }
 
-// NewEc2ByIDs creates an Ec2 engine based on instance IDs
+// NewEc2 creates an Ec2 engine
 func NewEc2(region string) (*Ec2Engine, error) {
 
 	client := ec2.New(session.New(), &aws.Config{
