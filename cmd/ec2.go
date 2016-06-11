@@ -48,11 +48,20 @@ func ec2Main(cmd *cobra.Command, args []string) {
 	}
 
 	// Create opener
-	e, err := aws.NewEc2ByIDs(instances)
+	e, err := aws.NewEc2(region)
 	if err != nil {
 		logrus.Error(err)
 		os.Exit(1)
 	}
+
+	// Initialize engine
+	err = e.InitByInstancesOrTags(instances, tags)
+	if err != nil {
+		logrus.Error(err)
+		os.Exit(1)
+	}
+
+	// Create opener with the required engine
 	rs := []*rule.Rule{}
 	o, err := opener.NewOpener(rs, e)
 	if err != nil {
@@ -88,6 +97,7 @@ func ec2Main(cmd *cobra.Command, args []string) {
 var (
 	instances []string
 	tags      []string
+	region    string
 )
 
 // ec2Cmd represents the ec2 command
@@ -113,4 +123,7 @@ func init() {
 				use multiple flag statements like -t tag1 -t tag2...; The presence '--instances' or '-i'
 				argument invalidates this argument`)
 	viper.BindPFlag("tags", ec2Cmd.Flags().Lookup("tags"))
+
+	ec2Cmd.Flags().StringVarP(&region, "region", "r", "us-west-1", `	AWS region target for AWS action execution`)
+	viper.BindPFlag("region", ec2Cmd.Flags().Lookup("region"))
 }
