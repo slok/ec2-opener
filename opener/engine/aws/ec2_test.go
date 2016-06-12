@@ -36,3 +36,44 @@ func TestDescribeInstancesByID(t *testing.T) {
 		}
 	}
 }
+
+func TestInitWithoutInstancesOrTags(t *testing.T) {
+	engine, err := NewEc2("")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = engine.InitByInstancesOrTags(nil, nil)
+	if err == nil {
+		t.Error("Initialization without instances or tags should return and error")
+	}
+
+}
+
+func TestInitWithInstances(t *testing.T) {
+	// Create mock for our EC2 engine
+	ctrl := gomock.NewController(t)
+	mockEC2 := mock_ec2iface.NewMockEC2API(ctrl)
+
+	engine, err := NewEc2("")
+	if err != nil {
+		t.Error(err)
+	}
+	engine.client = mockEC2
+	defer ctrl.Finish()
+	// Our API mock instances
+	expectedIds := []string{"i-mock1", "i-mock2", "i-mock3", "i-mock4"}
+	mock.SetDescribeInstancesSDK(t, mockEC2, expectedIds)
+
+	engine.InitByInstancesOrTags(expectedIds, nil)
+
+	if len(engine.instances) != len(expectedIds) {
+		t.Errorf("Wrong number of instances from AWS, got %d; want %d", len(engine.instances), len(expectedIds))
+	}
+
+	for idx, i := range engine.instances {
+		if aws.StringValue(i.InstanceId) != expectedIds[idx] {
+			t.Errorf("Wrong Instance ID, got %s; want %s", aws.StringValue(i.InstanceId), expectedIds[idx])
+		}
+	}
+}
