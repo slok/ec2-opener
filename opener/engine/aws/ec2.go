@@ -25,8 +25,8 @@ type Ec2Engine struct {
 	// Ec2 instances
 	instances []*ec2.Instance
 
-	// Security group ids created
-	createdSGIds []string
+	// Security group ids created per vpc map[VPCID]SGID
+	createdSGPerVPC map[string]string
 }
 
 // NewEc2 creates an Ec2 engine
@@ -41,8 +41,8 @@ func NewEc2(region string) (*Ec2Engine, error) {
 	}
 
 	e := &Ec2Engine{
-		client:       client,
-		createdSGIds: []string{},
+		client:          client,
+		createdSGPerVPC: map[string]string{},
 	}
 
 	return e, nil
@@ -149,7 +149,7 @@ func (e *Ec2Engine) createSecurityGroups(rules []*rule.Rule) error {
 		}
 
 		// Add to the created list
-		e.createdSGIds = append(e.createdSGIds, aws.StringValue(resp.GroupId))
+		e.createdSGPerVPC[vpcID] = aws.StringValue(resp.GroupId)
 		logrus.Debugf("Created security group: %s", *resp.GroupId)
 	}
 
@@ -158,7 +158,7 @@ func (e *Ec2Engine) createSecurityGroups(rules []*rule.Rule) error {
 		return err
 	}
 
-	logrus.Infof("Created %d security groups", len(e.createdSGIds))
+	logrus.Infof("Created %d security groups", len(e.createdSGPerVPC))
 	return nil
 }
 
