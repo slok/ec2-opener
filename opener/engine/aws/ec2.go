@@ -3,6 +3,8 @@ package aws
 import (
 	"errors"
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/aws"
@@ -22,6 +24,28 @@ type Ec2Engine struct {
 
 	// Ec2 instances
 	instances []*ec2.Instance
+
+	// Security group ids created
+	createdSGIds []string
+}
+
+// NewEc2 creates an Ec2 engine
+func NewEc2(region string) (*Ec2Engine, error) {
+
+	client := ec2.New(session.New(), &aws.Config{
+		Region: aws.String(region),
+	})
+
+	if client == nil {
+		return nil, errors.New("Could not connect with AWS")
+	}
+
+	e := &Ec2Engine{
+		client:       client,
+		createdSGIds: []string{},
+	}
+
+	return e, nil
 }
 
 // describeInstancesByID gets the instances from AWS querying by IDs
@@ -62,7 +86,7 @@ func (e *Ec2Engine) describeInstancesByID(ids []string) []*ec2.Instance {
 		nextToken = resp.NextToken
 	}
 
-	logrus.Debugf("Restrieved %d instances", len(result))
+	logrus.Infof("Restrieved %d instances", len(result))
 	return result
 }
 
@@ -91,26 +115,61 @@ func (e *Ec2Engine) InitByInstancesOrTags(instanceIds, tags []string) error {
 
 }
 
-// NewEc2 creates an Ec2 engine
-func NewEc2(region string) (*Ec2Engine, error) {
+// createSecurityGroups creates the EC2 SGs
+func (e *Ec2Engine) createSecurityGroups(rules []*rule.Rule) error {
+	var err error
+	var resp *ec2.CreateSecurityGroupOutput
 
-	client := ec2.New(session.New(), &aws.Config{
-		Region: aws.String(region),
-	})
+	// Create base name
+	s := rand.NewSource(time.Now().UnixNano())
+	groupName := fmt.Sprintf("opener-tmp-%d", rand.New(s).Intn(10000000))
 
-	if client == nil {
-		return nil, errors.New("Could not connect with AWS")
+	// Get all the VPCs
+	// Use a map to store a list of vcp ids with no duplicates
+	vpcs := map[*string]bool{}
+	for _, i := range e.instances {
+		vpcs[i.VpcId] = true
 	}
 
-	e := &Ec2Engine{
-		client: client,
+	logrus.Debugf("Creating security groups...")
+
+	// Create a SG for each VPC
+	for vpcID := range vpcs {
+		gn := fmt.Sprintf("%s-%s", groupName, *vpcID)
+		params := &ec2.CreateSecurityGroupInput{
+			Description: aws.String("Opener temporal security group"),
+			GroupName:   aws.String(gn),
+			VpcId:       vpcID,
+		}
+		resp, err = e.client.CreateSecurityGroup(params)
+		// If error stop creating
+		if err != nil {
+			logrus.Error("Error received, stopping security group creation")
+			continue
+		}
+
+		// Add to the created list
+		e.createdSGIds = append(e.createdSGIds, aws.StringValue(resp.GroupId))
+		logrus.Debugf("Created security group: %s", *resp.GroupId)
 	}
 
-	return e, nil
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+
+	logrus.Infof("Created %d security groups", len(e.createdSGIds))
+	return nil
 }
 
 // Open opens the rules on ec2 instances
 func (e *Ec2Engine) Open(rules []*rule.Rule) error {
+	// Create security groups
+	if err := e.createSecurityGroups(rules); err != nil {
+		return err
+	}
+	// Set rules on SG
+	// Assing SG to instances
 	return nil
 }
 
