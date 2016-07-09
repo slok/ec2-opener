@@ -126,20 +126,20 @@ func (e *Ec2Engine) createSecurityGroups(rules []*rule.Rule) error {
 
 	// Get all the VPCs
 	// Use a map to store a list of vcp ids with no duplicates
-	vpcs := map[*string]bool{}
+	vpcs := map[string]bool{}
 	for _, i := range e.instances {
-		vpcs[i.VpcId] = true
+		vpcs[aws.StringValue(i.VpcId)] = true
 	}
 
 	logrus.Debugf("Creating security groups...")
 
 	// Create a SG for each VPC
 	for vpcID := range vpcs {
-		gn := fmt.Sprintf("%s-%s", groupName, *vpcID)
+		gn := fmt.Sprintf("%s-%s", groupName, vpcID)
 		params := &ec2.CreateSecurityGroupInput{
 			Description: aws.String("Opener temporal security group"),
 			GroupName:   aws.String(gn),
-			VpcId:       vpcID,
+			VpcId:       aws.String(vpcID),
 		}
 		resp, err = e.client.CreateSecurityGroup(params)
 		// If error stop creating
