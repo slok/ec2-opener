@@ -86,7 +86,7 @@ func (e *Ec2Engine) describeInstancesByID(ids []string) []*ec2.Instance {
 		nextToken = resp.NextToken
 	}
 
-	logrus.Infof("Restrieved %d instances", len(result))
+	logrus.Infof("Retrieved %d instances", len(result))
 	return result
 }
 
