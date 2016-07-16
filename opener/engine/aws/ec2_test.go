@@ -21,8 +21,16 @@ func TestDescribeInstancesByID(t *testing.T) {
 	engine.client = mockEC2
 	defer ctrl.Finish()
 	// Our API mock instances
-	expectedIds := []string{"i-mock1", "i-mock2", "i-mock3"}
-	mock.SetDescribeInstancesSDK(t, mockEC2, expectedIds)
+	expectedInstances := []*mock.Instance{
+		&mock.Instance{ID: "i-mock1", VpcID: "vpc1"},
+		&mock.Instance{ID: "i-mock2", VpcID: "vpc1"},
+		&mock.Instance{ID: "i-mock3", VpcID: "vpc1"}}
+	mock.SetDescribeInstancesSDK(t, mockEC2, expectedInstances)
+
+	expectedIds := make([]string, len(expectedInstances))
+	for i, v := range expectedInstances {
+		expectedIds[i] = v.ID
+	}
 
 	// Check
 	output := engine.describeInstancesByID(expectedIds)
@@ -62,8 +70,17 @@ func TestInitWithInstances(t *testing.T) {
 	engine.client = mockEC2
 	defer ctrl.Finish()
 	// Our API mock instances
-	expectedIds := []string{"i-mock1", "i-mock2", "i-mock3", "i-mock4"}
-	mock.SetDescribeInstancesSDK(t, mockEC2, expectedIds)
+	expectedInstances := []*mock.Instance{
+		&mock.Instance{ID: "i-mock1", VpcID: "vpc1"},
+		&mock.Instance{ID: "i-mock2", VpcID: "vpc1"},
+		&mock.Instance{ID: "i-mock3", VpcID: "vpc1"},
+		&mock.Instance{ID: "i-mock4", VpcID: "vpc1"}}
+	mock.SetDescribeInstancesSDK(t, mockEC2, expectedInstances)
+
+	expectedIds := make([]string, len(expectedInstances))
+	for i, v := range expectedInstances {
+		expectedIds[i] = v.ID
+	}
 
 	engine.InitByInstancesOrTags(expectedIds, nil)
 

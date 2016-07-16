@@ -10,12 +10,18 @@ import (
 	"github.com/slok/ec2-opener/opener/engine/aws/mock/sdk"
 )
 
+// Instance is a mock object to create the instance
+type Instance struct {
+	ID    string
+	VpcID string
+}
+
 // SetDescribeInstancesSDK mocks describe instances call to EC2 SDK
-func SetDescribeInstancesSDK(t *testing.T, mockMatcher *mock_ec2iface.MockEC2API, instanceIDs []string) {
+func SetDescribeInstancesSDK(t *testing.T, mockMatcher *mock_ec2iface.MockEC2API, instanceIDs []*Instance) {
 	// Out API mock instances
 	instances := make([]*ec2.Instance, len(instanceIDs))
 	for idx, i := range instanceIDs {
-		instances[idx] = &ec2.Instance{InstanceId: aws.String(i)}
+		instances[idx] = &ec2.Instance{InstanceId: aws.String(i.ID), VpcId: aws.String(i.VpcID)}
 	}
 
 	reservation := &ec2.Reservation{
@@ -33,8 +39,8 @@ func SetDescribeInstancesSDK(t *testing.T, mockMatcher *mock_ec2iface.MockEC2API
 		}
 
 		for idx, i := range gotInstances.InstanceIds {
-			if aws.StringValue(i) != instanceIDs[idx] {
-				t.Fatalf("Received wrong instance ID, got %s; want %s", aws.StringValue(i), instanceIDs[idx])
+			if aws.StringValue(i) != instanceIDs[idx].ID {
+				t.Fatalf("Received wrong instance ID, got %s; want %s", aws.StringValue(i), instanceIDs[idx].ID)
 			}
 		}
 
