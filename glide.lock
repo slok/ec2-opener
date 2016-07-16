@@ -1,30 +1,31 @@
-hash: 37830887afd38cfb286fa19f6426e00f8fc3ff6b3e9ee45f2d2724acd7c2f9c1
-updated: 2016-06-09T07:41:49.249389433Z
+hash: 6279f762511a2e5bab18c8eb7335a1b33e927e0b2313bc5d1adf38508a837738
+updated: 2016-07-16T10:20:29.588220812Z
 imports:
 - name: github.com/aws/aws-sdk-go
   version: 665c623d7f3e0ee276596b006655ba4dbe0565b0
   subpackages:
-  - service/ec2
   - aws
   - aws/session
-  - aws/awsutil
-  - aws/client
-  - aws/client/metadata
+  - service/ec2
+  - service/ec2/ec2iface
   - aws/request
+  - aws/awserr
+  - aws/credentials
+  - aws/client
+  - aws/corehandlers
+  - aws/defaults
   - private/endpoints
+  - aws/awsutil
+  - aws/client/metadata
   - private/protocol
   - private/protocol/ec2query
   - private/signer/v4
   - private/waiter
-  - aws/awserr
-  - aws/credentials
-  - aws/corehandlers
-  - aws/defaults
+  - aws/credentials/ec2rolecreds
+  - aws/ec2metadata
   - private/protocol/query/queryutil
   - private/protocol/xml/xmlutil
   - private/protocol/rest
-  - aws/credentials/ec2rolecreds
-  - aws/ec2metadata
 - name: github.com/BurntSushi/toml
   version: f0aeabca5a127c4078abb8c8d64298b147264b55
 - name: github.com/fatih/color
@@ -70,8 +71,10 @@ imports:
   version: cb88ea77998c3f024757528e3305022ab50b43be
 - name: github.com/spf13/viper
   version: c1ccc378a054ea8d4e38d8c67f6938d4760b53dd
-- name: golang.org/x/sys/unix
-  version: ""
+- name: golang.org/x/sys
+  version: b518c298ac9dc94b6ac0757394f50d10c5dfa25a
+  subpackages:
+  - unix
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 devImports: []
