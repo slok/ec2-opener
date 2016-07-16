@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -44,5 +45,22 @@ func SetDescribeInstancesSDK(t *testing.T, mockMatcher *mock_ec2iface.MockEC2API
 			}
 		}
 
-	}).Return(result, nil)
+	}).AnyTimes().Return(result, nil)
+}
+
+// SetCreateSecurityGroupSDK mocks creating security group on an VPC
+func SetCreateSecurityGroupSDK(t *testing.T, mockMatcher *mock_ec2iface.MockEC2API) {
+	result := &ec2.CreateSecurityGroupOutput{}
+
+	mockMatcher.EXPECT().CreateSecurityGroup(gomock.Any()).Do(func(input interface{}) {
+		sgInput := input.(*ec2.CreateSecurityGroupInput)
+		if aws.StringValue(sgInput.GroupName) == "" || sgInput.GroupName == nil {
+			t.Fatalf("Received wrong group name parameter")
+		}
+
+		// Set the group id
+		result.GroupId = aws.String(fmt.Sprintf("%s-id", aws.StringValue(sgInput.GroupName)))
+
+	}).AnyTimes().Return(result, nil)
+
 }

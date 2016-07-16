@@ -4,9 +4,11 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/golang/mock/gomock"
 	"github.com/slok/ec2-opener/opener/engine/aws/mock"
 	"github.com/slok/ec2-opener/opener/engine/aws/mock/sdk"
+	"github.com/slok/ec2-opener/rule"
 )
 
 func TestDescribeInstancesByID(t *testing.T) {
@@ -92,5 +94,65 @@ func TestInitWithInstances(t *testing.T) {
 		if aws.StringValue(i.InstanceId) != expectedIds[idx] {
 			t.Errorf("Wrong Instance ID, got %s; want %s", aws.StringValue(i.InstanceId), expectedIds[idx])
 		}
+	}
+}
+
+func TestCreateSecurityGroupsSingleVPC(t *testing.T) {
+	// Create mock for our EC2 engine
+	ctrl := gomock.NewController(t)
+	mockEC2 := mock_ec2iface.NewMockEC2API(ctrl)
+
+	engine, err := NewEc2("")
+	if err != nil {
+		t.Error(err)
+	}
+	engine.client = mockEC2
+	defer ctrl.Finish()
+
+	// Mock ec2 API
+	mock.SetCreateSecurityGroupSDK(t, mockEC2)
+
+	// Set our instances
+	engine.instances = []*ec2.Instance{
+		&ec2.Instance{InstanceId: aws.String("i-mock1"), VpcId: aws.String("vpc1")},
+		&ec2.Instance{InstanceId: aws.String("i-mock2"), VpcId: aws.String("vpc1")},
+	}
+	// Create the required security groups
+	if err := engine.createSecurityGroups([]*rule.Rule{}); err != nil {
+		t.Errorf("Failed creating security groups: %s", err)
+	}
+
+	if len(engine.createdSGPerVPC) != 1 {
+		t.Errorf("Should create one security group, intead created %d", len(engine.createdSGPerVPC))
+	}
+}
+
+func TestCreateSecurityGroupsMultipleVPC(t *testing.T) {
+	// Create mock for our EC2 engine
+	ctrl := gomock.NewController(t)
+	mockEC2 := mock_ec2iface.NewMockEC2API(ctrl)
+
+	engine, err := NewEc2("")
+	if err != nil {
+		t.Error(err)
+	}
+	engine.client = mockEC2
+	defer ctrl.Finish()
+
+	// Mock ec2 API
+	mock.SetCreateSecurityGroupSDK(t, mockEC2)
+
+	// Set our instances
+	engine.instances = []*ec2.Instance{
+		&ec2.Instance{InstanceId: aws.String("i-mock1"), VpcId: aws.String("vpc1")},
+		&ec2.Instance{InstanceId: aws.String("i-mock2"), VpcId: aws.String("vpc2")},
+	}
+	// Create the required security groups
+	if err := engine.createSecurityGroups([]*rule.Rule{}); err != nil {
+		t.Errorf("Failed creating security groups: %s", err)
+	}
+
+	if len(engine.createdSGPerVPC) != len(engine.instances) {
+		t.Errorf("Invalid number of security groups created, got: %d; want: %d", len(engine.createdSGPerVPC), len(engine.instances))
 	}
 }
