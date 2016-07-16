@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -62,5 +63,26 @@ func SetCreateSecurityGroupSDK(t *testing.T, mockMatcher *mock_ec2iface.MockEC2A
 		result.GroupId = aws.String(fmt.Sprintf("%s-id", aws.StringValue(sgInput.GroupName)))
 
 	}).AnyTimes().Return(result, nil)
+
+}
+
+// SetCreateSecurityGroupWithErrorSDK mocks creating security group on an VPC and error on the X call
+func SetCreateSecurityGroupWithErrorSDK(t *testing.T, mockMatcher *mock_ec2iface.MockEC2API, errorTime int) {
+	result := &ec2.CreateSecurityGroupOutput{}
+
+	// This is the number of calls that will return ok
+	call1 := mockMatcher.EXPECT().CreateSecurityGroup(gomock.Any()).Do(func(input interface{}) {
+		sgInput := input.(*ec2.CreateSecurityGroupInput)
+		if aws.StringValue(sgInput.GroupName) == "" || sgInput.GroupName == nil {
+			t.Fatalf("Received wrong group name parameter")
+		}
+
+		// Set the group id
+		result.GroupId = aws.String(fmt.Sprintf("%s-id", aws.StringValue(sgInput.GroupName)))
+
+	}).MaxTimes(errorTime-1).Return(result, nil)
+
+	// This time will fail
+	mockMatcher.EXPECT().CreateSecurityGroup(gomock.Any()).After(call1).Return(nil, errors.New("Error on call"))
 
 }

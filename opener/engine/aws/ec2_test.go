@@ -156,3 +156,38 @@ func TestCreateSecurityGroupsMultipleVPC(t *testing.T) {
 		t.Errorf("Invalid number of security groups created, got: %d; want: %d", len(engine.createdSGPerVPC), len(engine.instances))
 	}
 }
+
+func TestCreateSecurityGroupsError(t *testing.T) {
+	// Create mock for our EC2 engine
+	ctrl := gomock.NewController(t)
+	mockEC2 := mock_ec2iface.NewMockEC2API(ctrl)
+
+	engine, err := NewEc2("")
+	if err != nil {
+		t.Error(err)
+	}
+	engine.client = mockEC2
+	defer ctrl.Finish()
+
+	// Mock ec2 API
+	// Fail on third time, will only create 2 security groups
+	errorTime := 3
+	mock.SetCreateSecurityGroupWithErrorSDK(t, mockEC2, errorTime)
+
+	// Set our instances
+	engine.instances = []*ec2.Instance{
+		&ec2.Instance{InstanceId: aws.String("i-mock1"), VpcId: aws.String("vpc1")},
+		&ec2.Instance{InstanceId: aws.String("i-mock2"), VpcId: aws.String("vpc2")},
+		&ec2.Instance{InstanceId: aws.String("i-mock3"), VpcId: aws.String("vpc1")},
+		&ec2.Instance{InstanceId: aws.String("i-mock4"), VpcId: aws.String("vpc3")},
+	}
+	// Create the required security groups
+	if err := engine.createSecurityGroups([]*rule.Rule{}); err == nil {
+		t.Errorf("Should return an error")
+	}
+
+	expectedNumber := errorTime - 1
+	if len(engine.createdSGPerVPC) != expectedNumber {
+		t.Errorf("Invalid number of security groups created, got: %d; want: %d", len(engine.createdSGPerVPC), expectedNumber)
+	}
+}
