@@ -86,3 +86,18 @@ func SetCreateSecurityGroupWithErrorSDK(t *testing.T, mockMatcher *mock_ec2iface
 	mockMatcher.EXPECT().CreateSecurityGroup(gomock.Any()).After(call1).Return(nil, errors.New("Error on call"))
 
 }
+
+// SetAuthorizeSecurityGroupIngressSDK mocks the set of rules on security groups
+func SetAuthorizeSecurityGroupIngressSDK(t *testing.T, mockMatcher *mock_ec2iface.MockEC2API) {
+	result := &ec2.AuthorizeSecurityGroupIngressOutput{}
+	mockMatcher.EXPECT().AuthorizeSecurityGroupIngress(gomock.Any()).Do(func(input interface{}) {
+		sgInput := input.(*ec2.AuthorizeSecurityGroupIngressInput)
+		if len(sgInput.IpPermissions) == 0 {
+			t.Fatalf("Received empty permissions")
+		}
+
+		if aws.StringValue(sgInput.GroupId) == "" {
+			t.Fatalf("Received empty Group ID")
+		}
+	}).AnyTimes().Return(result, nil)
+}

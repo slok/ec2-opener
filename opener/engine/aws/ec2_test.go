@@ -191,3 +191,79 @@ func TestCreateSecurityGroupsError(t *testing.T) {
 		t.Errorf("Invalid number of security groups created, got: %d; want: %d", len(engine.createdSGPerVPC), expectedNumber)
 	}
 }
+
+func TestSetSecurityGroupRules(t *testing.T) {
+	// Create mock for our EC2 engine
+	ctrl := gomock.NewController(t)
+	mockEC2 := mock_ec2iface.NewMockEC2API(ctrl)
+
+	engine, err := NewEc2("")
+	if err != nil {
+		t.Error(err)
+	}
+	engine.client = mockEC2
+	defer ctrl.Finish()
+
+	// Mock ec2 API
+	mock.SetAuthorizeSecurityGroupIngressSDK(t, mockEC2)
+
+	// Set our security groups
+	engine.createdSGPerVPC = map[string]string{
+		"vpc1": "sg-1251",
+		"vpc2": "sg-1252",
+		"vpc3": "sg-1253",
+		"vpc4": "sg-1254",
+	}
+
+	rs := []*rule.Rule{
+		&rule.Rule{Protocol: rule.TCP, CIDR: "0.0.0.0/0", Port: 22},
+		&rule.Rule{Protocol: rule.TCP, CIDR: "0.0.0.0/0", Port: 80},
+		&rule.Rule{Protocol: rule.TCP, CIDR: "0.0.0.0/0", Port: 443},
+	}
+	err = engine.setSecurityGroupRules(rs)
+	if err != nil {
+		t.Errorf("Security Group rules set shouldn't fail: %s", err)
+	}
+}
+
+func TestSetSecurityGroupRulesError(t *testing.T) {
+
+	tests := []struct {
+		SGs   map[string]string
+		rules []*rule.Rule
+	}{
+		{
+			SGs:   map[string]string{},
+			rules: []*rule.Rule{&rule.Rule{Protocol: rule.TCP, CIDR: "0.0.0.0/0", Port: 22}},
+		},
+		{
+			SGs:   map[string]string{"vpc1": "sg-1251", "vpc2": "sg-1252"},
+			rules: []*rule.Rule{},
+		},
+	}
+
+	// Create mock for our EC2 engine
+	ctrl := gomock.NewController(t)
+	mockEC2 := mock_ec2iface.NewMockEC2API(ctrl)
+
+	for _, test := range tests {
+
+		engine, err := NewEc2("")
+		if err != nil {
+			t.Error(err)
+		}
+		engine.client = mockEC2
+		defer ctrl.Finish()
+
+		// Mock ec2 API
+		mock.SetAuthorizeSecurityGroupIngressSDK(t, mockEC2)
+
+		// Set our security groups
+		engine.createdSGPerVPC = test.SGs
+		err = engine.setSecurityGroupRules(test.rules)
+		if err == nil {
+			t.Errorf("%+v\n - Security Group rules set should fail, it dind't", test)
+		}
+	}
+
+}

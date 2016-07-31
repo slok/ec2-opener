@@ -15,7 +15,7 @@ import (
 	"github.com/slok/ec2-opener/rule"
 )
 
-// go:generate mockgen -source vendor/github.com/aws/aws-sdk-go/service/ec2/ec2iface/interface.go  -destination opener/engine/aws/mock/sdk/ec2iface_mock.go
+//go:generate mockgen -source vendor/github.com/aws/aws-sdk-go/service/ec2/ec2iface/interface.go  -destination opener/engine/aws/mock/sdk/ec2iface_mock.go
 
 // Ec2Engine representes the ec2 opener logic
 type Ec2Engine struct {
@@ -145,7 +145,7 @@ func (e *Ec2Engine) createSecurityGroups(rules []*rule.Rule) error {
 		// If error stop creating
 		if err != nil {
 			logrus.Error("Error received, stopping security group creation")
-			continue
+			return err
 		}
 
 		// Add to the created list
@@ -153,12 +153,48 @@ func (e *Ec2Engine) createSecurityGroups(rules []*rule.Rule) error {
 		logrus.Debugf("Created security group: %s", *resp.GroupId)
 	}
 
-	if err != nil {
-		logrus.Error(err)
-		return err
+	logrus.Infof("Created %d security groups", len(e.createdSGPerVPC))
+	return nil
+}
+
+// setSecurityGroupRules sets the securty group ingress rules on the SG
+func (e *Ec2Engine) setSecurityGroupRules(rules []*rule.Rule) error {
+	if len(rules) == 0 {
+		return fmt.Errorf("No rules to set")
 	}
 
-	logrus.Infof("Created %d security groups", len(e.createdSGPerVPC))
+	if len(e.createdSGPerVPC) == 0 {
+		return fmt.Errorf("No target security groups")
+	}
+
+	// Create the rules
+	perms := make([]*ec2.IpPermission, len(rules))
+	for i, r := range rules {
+		perms[i] = &ec2.IpPermission{
+			IpProtocol: aws.String(r.Protocol.String()),
+			FromPort:   aws.Int64(int64(r.Port)),
+			ToPort:     aws.Int64(int64(r.Port)),
+			IpRanges:   []*ec2.IpRange{{CidrIp: aws.String(r.CIDR)}},
+		}
+	}
+
+	// Set the rules on each security group
+	for _, sgID := range e.createdSGPerVPC {
+		params := &ec2.AuthorizeSecurityGroupIngressInput{
+			GroupId:       aws.String(sgID),
+			IpPermissions: perms,
+		}
+		_, err := e.client.AuthorizeSecurityGroupIngress(params)
+
+		// If error then break everything
+		if err != nil {
+			logrus.Error("Error received, stopping setting the rules on security groups")
+			return err
+		}
+		logrus.Debugf("Setted rules on security group: %s", sgID)
+	}
+
+	logrus.Infof("Setted %d rules on %d security groups", len(rules), len(e.createdSGPerVPC))
 	return nil
 }
 
@@ -169,6 +205,9 @@ func (e *Ec2Engine) Open(rules []*rule.Rule) error {
 		return err
 	}
 	// Set rules on SG
+	if err := e.setSecurityGroupRules(rules); err != nil {
+		return err
+	}
 	// Assing SG to instances
 	return nil
 }
